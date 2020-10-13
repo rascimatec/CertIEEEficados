@@ -9,7 +9,7 @@ W, H = img.size
 
 for lin, col in df.iterrows():
   certificado = img.copy()
-  text = col['Nomes']
+  text = col['Nome']
   text_wrap = textwrap.wrap(text, width=25)
   draw = ImageDraw.Draw(certificado)
   current_h = 0.35*H if (len(text_wrap) < 2) else 0.32*H
