@@ -17,4 +17,5 @@ for lin, col in df.iterrows():
     w, h = draw.textsize(line, font=font)
     draw.text(xy=((W-w)/2, (current_h)), text=line, fill=(0,0,0), font=font)
     current_h += h + 4
-  certificado.save('certificados/{}.png'.format(text))
+  certificado_pdf = certificado.convert('RGB')
+  certificado_pdf.save('certificados/{}.pdf'.format(text))
