@@ -1,34 +1,11 @@
 from PIL import Image, ImageDraw, ImageFont
-import PySimpleGUI as sg
 import pandas as pd
 import textwrap
 import os.path
 
 
 class PreencherCertificados:
-  
   def __init__(self):
-    
-    sg.theme('DarkAmber')
-
-    self.col_browse = [[sg.Text('Pasta de Dados (.CSV)', size=(20,0)), sg.Input(size=(40,0), key='csv_folder'), sg.FolderBrowse()],
-                       [sg.Text('Pasta de Modelos', size=(20,0)), sg.Input(size=(40,0), key='models_folder'), sg.FolderBrowse()],
-                       [sg.Text('Pasta de Certificados', size=(20,0)), sg.Input(size=(40,0), key='destination_folder'), sg.FolderBrowse()]]
-    self.col_lines = [[sg.Text('Altura da linha (única)', size=(22,0)), sg.Slider(range=(0,1000), default_value=500, orientation='h', size=(15,12), key="y1")],
-                      [sg.Text('Altura da linha (múltiplas)', size=(22,0)), sg.Slider(range=(0,1000), default_value=500, orientation='h', size=(15,12), key="y2")]]
-    self.col_font = [[sg.Text('Comprimento', size=(15,0)), sg.Input(size=(10, 0), key="width")],
-                     [sg.Text('Tamanho da fonte', size=(15,0)), sg.Input(size=(10, 0), key="font_size")],
-                     [sg.Text('Espacamento',size=(15,0)), sg.Input(size=(10,0), key="espacamento")]]
-    self.col_total = [[sg.Column(col_browse)], [sg.Column(col_lines), sg.Column(col_font)]]
-
-    self.layout = [[sg.Image(r'wallpaper_ieee.png'), sg.Column(col_total)],
-                   [sg.Button('Anterior', size=(12,0), key="prev"), sg.Button('Proximo', size=(12,0), key="next"), 
-                    sg.Text(size=(60,0)), sg.Cancel(), sg.OK()]]
-
-    self.font = ImageFont.truetype(font="_recursos/fonte.ttf", size=font_size)
-    
-    self.certificados = [os.path.splitext(filename)[0] for filename in os.listdir(self.pasta_certificados)]
-
     self.coluna_nomes = 'Nome Completo'
     self.pasta_dados = '_recursos/csv'
     self.pasta_modelos = '_recursos/modelos'
