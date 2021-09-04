@@ -12,19 +12,19 @@ class PreencherCertificados:
     
     sg.theme('DarkAmber')
 
-    self.__col_browse = [[sg.Text('Pasta de Dados (.CSV)', size=(20,0)), sg.Input(size=(40,0), key='csv_folder', default_text="./_recursos/csv"), sg.FolderBrowse()],
-                         [sg.Text('Pasta de Modelos', size=(20,0)), sg.Input(size=(40,0), key='models_folder', default_text="./_recursos/modelos"), sg.FolderBrowse()],
+    self.__col_browse = [[sg.Text('Pasta de Dados (.CSV)', size=(20,0)), sg.Input(size=(40,0), key='csv_folder', default_text="./materiais/csv"), sg.FolderBrowse()],
+                         [sg.Text('Pasta de Modelos', size=(20,0)), sg.Input(size=(40,0), key='models_folder', default_text="./materiais/modelos"), sg.FolderBrowse()],
                          [sg.Text('Pasta de Certificados', size=(20,0)), sg.Input(size=(40,0), key='destination_folder', default_text="./certificados"), sg.FolderBrowse()],
                          [sg.Text('Altura da linha (única / múltiplas)', size=(28,0)), sg.Slider(range=(0,1000), default_value=500, orientation='h', size=(17,12), key="y1"),
                           sg.Slider(range=(0,1000), default_value=500, orientation='h', size=(17,12), key="y2")]]
     self.__col_font = [[sg.Text('Comprimento', size=(15,0)), sg.Input(size=(6, 0), key="width", default_text="10")],
                        [sg.Text('Tamanho da fonte', size=(15,0)), sg.Input(size=(6, 0), key="font_size", default_text="100")],
                        [sg.Text('Espaçamento',size=(15,0)), sg.Input(size=(6, 0), key="espacamento", default_text="10")]]
-    self.__col_font_color = [[sg.Text('Red', size=(5,0)), sg.Spin([rc for rc in range(0, 265)], key="red", size=(4,0))],
+    self.__col_font_color = [[sg.Text('Red', size=(5,0)), sg.Spin([rc for rc in range(0, 256)], key="red", size=(4,0))],
                              [sg.Text('Green', size=(5,0)), sg.Spin([gc for gc in range(0, 256)], key="green", size=(4,0))],
                              [sg.Text('Blue', size=(5,0)), sg.Spin([bc for bc in range(0, 256)], key="blue", size=(4,0))]]
     self.__col_name = [[sg.Text('Coluna de Nomes', size=(15,0)), sg.Input(size=(15,0), key="names_col", default_text="Nome Completo")],
-                       [sg.Text('Fonte', size=(5,0)), sg.Input(size=(15,0), key='font', default_text="./recursos/fonte.ttf"), sg.FileBrowse(size=(4,0))],
+                       [sg.Text('Fonte', size=(5,0)), sg.Input(size=(15,0), key='font', default_text="./materiais/fonte.ttf"), sg.FileBrowse(size=(4,0))],
                        [sg.Cancel(), sg.Button('Update', key='update'), sg.OK(size=(5,0))]]
 
     self.__col_total = [[sg.Column(self.__col_browse)], [sg.Column(self.__col_font), sg.Column(self.__col_font_color), sg.Column(self.__col_name)]]
@@ -54,12 +54,10 @@ class PreencherCertificados:
         break
       elif self.event == 'update':
         if not os.path.isdir(self.values['csv_folder']):
-          print("erro")
-          sg.Popup("Erro", "Pasta de Dados (.CSV) não existe. Insira um caminho válido.")
+          self.__timeout = None
         else:
-          print("set timeout")
           self.__timeout = 100
-      else:
+      elif self.__timeout != None:
         if self.event == 'prev' and self.__cont > 0:
           self.__cont -= 1
         elif self.event == 'next' and self.__cont < len(pd.read_csv(self.values['csv_folder'] + '/' + self.__data[self.__cont_model])) - 1:
@@ -70,16 +68,17 @@ class PreencherCertificados:
         elif self.event == 'next_model' and self.__cont_model < len(self.__wks)-1:
           self.__cont_model += 1
           self.__cont = 0
-      self.updateInterface()
+      if self.__timeout != None:
+        self.updateInterface()
 
     self.window.close()
 
   def updateInterface(self):
     wk = self.__data[self.__cont_model]
-    self.__data = pd.read_csv(self.values['csv_folder'] + '/' + wk)
+    self.__wk_data = pd.read_csv(self.values['csv_folder'] + '/' + wk)
     img = Image.open(self.values['models_folder']+'/'+self.__models[self.__cont_model])
 
-    for i, col in self.__data.iterrows():
+    for i, col in self.__wk_data.iterrows():
       if i == self.__cont:
         image, _ = self.writeCertificate(img, col)    
         image.thumbnail((420, 420))
@@ -91,11 +90,13 @@ class PreencherCertificados:
 
   def getData(self):
 
-    self.__font = ImageFont.truetype(font="_recursos/fonte.ttf", size=int(self.values['font_size']))
+    if not os.path.isfile(self.values['font']):
+      sg.Popup("Erro", "Arquivo de fonte .ttf não existe. Insira um arquivo válido.")
+      self.__font = None
+      self.__timeout = None
+    else:
+      self.__font = ImageFont.truetype(font=self.values['font'], size=int(self.values['font_size']))
 
-    if not os.path.isdir(self.values['destination_folder']):
-      os.mkdir('./'+self.values['destination_folder'])
-    self.__certificates = [os.path.splitext(filename)[0] for filename in os.listdir(self.values['destination_folder'])]
     if not os.path.isdir(self.values['csv_folder']):
       sg.Popup("Erro", "Pasta de Dados (.CSV) não existe. Insira um caminho válido.")
       self.__timeout = None
@@ -127,6 +128,8 @@ class PreencherCertificados:
 
 
   def generateCertificates(self):
+    if not os.path.isdir(self.values['destination_folder']):
+      os.mkdir('./'+self.values['destination_folder'])
 
     for pasta in self.__folders:
       if not os.path.isdir(pasta):
@@ -145,3 +148,9 @@ class PreencherCertificados:
       print(wk[:-4].upper() + " finalizado...")
 
     sg.Popup("", "Todos os certificados foram gerados com sucesso!")
+
+
+
+if __name__ == "__main__":
+  gerador = PreencherCertificados()
+  gerador.initInterface()
