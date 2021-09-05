@@ -55,6 +55,8 @@ class PreencherCertificados:
       elif self.event == 'update':
         if not os.path.isdir(self.values['csv_folder']):
           self.__timeout = None
+        elif not os.path.isdir(self.values['models_folder']):
+          self.__timeout = None
         else:
           self.__timeout = 100
       elif self.__timeout != None:
@@ -129,11 +131,11 @@ class PreencherCertificados:
 
   def generateCertificates(self):
     if not os.path.isdir(self.values['destination_folder']):
-      os.mkdir('./'+self.values['destination_folder'])
+      os.mkdir(self.values['destination_folder'])
 
     for pasta in self.__folders:
       if not os.path.isdir(pasta):
-        os.mkdir('./'+pasta)
+        os.mkdir(pasta)
 
     for i, wk in enumerate(self.__data):
 
