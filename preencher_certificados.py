@@ -37,7 +37,7 @@ class PreencherCertificados:
     self.__folders = list()
 
     self.__cont = 0
-    self.__cont_model = -1
+    self.__cont_model = 0
 
     self.__timeout = None
 
